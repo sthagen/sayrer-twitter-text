@@ -37,6 +37,7 @@ const configs = {
   version1: wasm.TwitterTextConfiguration.configV1(),
   version2: wasm.TwitterTextConfiguration.configV2(),
   version3: wasm.TwitterTextConfiguration.configV3(),
+  version4: wasm.TwitterTextConfiguration.configV4(),
   defaults: wasm.TwitterTextConfiguration.configV3(),
 };
 
@@ -271,6 +272,8 @@ function parseTweet(text, config) {
     wasmConfig = wasm.TwitterTextConfiguration.configV2();
   } else if (config === configs.version3) {
     wasmConfig = wasm.TwitterTextConfiguration.configV3();
+  } else if (config === configs.version4) {
+    wasmConfig = wasm.TwitterTextConfiguration.configV4();
   } else {
     wasmConfig = wasm.TwitterTextConfiguration.configV3();
   }

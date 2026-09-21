@@ -10,6 +10,7 @@ java_library(
         "//config:v1.json",
         "//config:v2.json",
         "//config:v3.json",
+        "//config:v4.json",
     ],
     resource_strip_prefix = "config",
     deps = [

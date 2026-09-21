@@ -104,6 +104,7 @@ pub mod ffi {
         fn config_v1() -> UniquePtr<Configuration>;
         fn config_v2() -> UniquePtr<Configuration>;
         fn config_v3() -> UniquePtr<Configuration>;
+        fn config_v4() -> UniquePtr<Configuration>;
         fn default_config() -> UniquePtr<Configuration>;
         fn get_config_weighted_ranges(config: &Configuration) -> Vec<WeightedRange>;
         fn configuration_from_path(path: &str) -> UniquePtr<Configuration>;
@@ -360,6 +361,10 @@ pub fn config_v2() -> UniquePtr<ffi::Configuration> {
 
 pub fn config_v3() -> UniquePtr<ffi::Configuration> {
     UniquePtr::new(ffi::Configuration::from(twitter_text_config::config_v3()))
+}
+
+pub fn config_v4() -> UniquePtr<ffi::Configuration> {
+    UniquePtr::new(ffi::Configuration::from(twitter_text_config::config_v4()))
 }
 
 pub fn default_config() -> UniquePtr<ffi::Configuration> {

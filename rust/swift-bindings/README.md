@@ -7,7 +7,7 @@ Swift bindings for the twitter-text library, providing parsing and validation fo
 - Extract URLs, mentions, hashtags, and cashtags from tweet text
 - Automatic linking of entities to HTML
 - Tweet validation and length calculation
-- Support for different configuration versions (v1, v2, v3)
+- Support for different configuration versions (v1, v2, v3, v4)
 - Full Unicode support
 
 ## Installation
@@ -86,6 +86,7 @@ let config = Configuration.default
 let v1 = Configuration.v1
 let v2 = Configuration.v2
 let v3 = Configuration.v3
+let v4 = Configuration.v4  // opt-in: weighs Runic like Latin
 
 // Access configuration properties
 print("Max tweet length: \(config.maxWeightedTweetLength)")

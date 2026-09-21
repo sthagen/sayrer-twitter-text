@@ -64,6 +64,22 @@ RSpec.describe Twittertext::Validator do
         validate_weighting(yaml["tests"]["WeightedTweetsWithDiscountedEmojiCounterTest"], Twittertext::TwitterTextConfiguration.config_v3)
         validate_weighting(yaml["tests"]["UnicodeDirectionalMarkerCounterTest"], Twittertext::TwitterTextConfiguration.config_v3)
     end
+
+    it 'weighs runes like Latin under v4 only' do
+        # https://github.com/twitter/twitter-text/issues/430
+        runes = "\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2"
+
+        v4 = Twittertext::TwitterTextParser.parse(runes, Twittertext::TwitterTextConfiguration.config_v4, true)
+        expect(v4.weighted_length).to eq 6
+        expect(v4.is_valid).to eq true
+
+        v3 = Twittertext::TwitterTextParser.parse(runes, Twittertext::TwitterTextConfiguration.config_v3, true)
+        expect(v3.weighted_length).to eq 12
+
+        # v4 is opt-in: the default configuration still weighs runes as logograms.
+        default = Twittertext::TwitterTextParser.parse(runes, Twittertext::TwitterTextConfiguration.new, true)
+        expect(default.weighted_length).to eq 12
+    end
 end
 
 def validate_weighting(tests, config)

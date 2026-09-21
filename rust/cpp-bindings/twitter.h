@@ -80,6 +80,10 @@ public:
     return new TwitterTextConfiguration(config_v3());
   }
 
+  static TwitterTextConfiguration* configV4() {
+    return new TwitterTextConfiguration(config_v4());
+  }
+
   std::vector<::twitter_text::WeightedRange> getRanges() {
     std::vector<WeightedRange> stdv;
     std::copy(config->ranges.begin(), config->ranges.end(), std::back_inserter(stdv));

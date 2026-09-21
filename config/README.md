@@ -30,7 +30,13 @@ A `range item` has the following properties:
 The version for the configuration string. This is an integer that will
 monotonically increase in future releases. The legacy version of the
 string is version 1; weighted code point ranges and 280-character
-“long” tweets are supported in version 2.
+“long” tweets are supported in version 2. Version 3, the default, adds
+`emojiParsingEnabled`. Version 4 corrects the weighting of the Runic
+block (U+16A0–U+16FF): it is an alphabetic script, so it weighs the
+same as Latin rather than taking the default weight (see
+[twitter-text#430](https://github.com/twitter/twitter-text/issues/430)).
+Version 4 must be selected explicitly; versions 1 through 3 are
+unchanged from upstream twitter-text.
 
 ### maxWeightedTweetLength
 

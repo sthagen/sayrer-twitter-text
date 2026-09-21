@@ -23,6 +23,12 @@ public class Configuration {
         return Configuration(handle: twitter_text_config_v3()!)
     }
 
+    /// Get configuration v4, which weighs the Runic block like Latin. Opt-in:
+    /// `default` remains v3.
+    public static var v4: Configuration {
+        return Configuration(handle: twitter_text_config_v4()!)
+    }
+
     private init(handle: OpaquePointer) {
         self.handle = handle
     }

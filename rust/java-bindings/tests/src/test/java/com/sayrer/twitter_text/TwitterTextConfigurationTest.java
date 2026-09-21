@@ -51,6 +51,28 @@ public class TwitterTextConfigurationTest extends TestCase {
     assertEquals(configuration.getRanges().size(), 0);
   }
 
+  public void testVersion4() {
+    final TwitterTextConfiguration configuration =
+        TwitterTextConfiguration.configurationFromJson("v4.json", true);
+    assertEquals(configuration.getVersion(), 4);
+    assertEquals(configuration.getMaxWeightedTweetLength(), 280);
+    final List<TwitterTextConfiguration.TwitterTextWeightedRange> ranges =
+        configuration.getRanges();
+    assertNotNull(ranges);
+    assertEquals(ranges.size(), 5);
+    // v4 adds the Runic block, which v3 leaves at the default weight.
+    final TwitterTextConfiguration.TwitterTextWeightedRange runicRange = ranges.get(1);
+    assertEquals(runicRange.getRange(), new Range(5792, 5887));
+    assertEquals(runicRange.getWeight(), 100);
+  }
+
+  public void testVersion3RetainsUpstreamRanges() {
+    final TwitterTextConfiguration configuration =
+        TwitterTextConfiguration.configurationFromJson("v3.json", true);
+    assertEquals(configuration.getVersion(), 3);
+    assertEquals(configuration.getRanges().size(), 4);
+  }
+
   public void testVersion2() {
     final TwitterTextConfiguration configuration =
         TwitterTextConfiguration.configurationFromJson("v2.json", true);

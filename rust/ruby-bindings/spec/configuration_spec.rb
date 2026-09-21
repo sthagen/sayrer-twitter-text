@@ -3,6 +3,7 @@ require_relative 'spec_helper'
 RSpec.describe Twittertext::TwitterTextConfiguration do
     it 'has a working constructor' do
         config = Twittertext::TwitterTextConfiguration.new
+        # The default configuration is v3; v4 is opt-in.
         expect(config.get_version).to eq 3
     end
 
@@ -76,8 +77,11 @@ RSpec.describe Twittertext::TwitterTextConfiguration do
     end
 
     it 'has the correct default ranges' do
+        # The default configuration is v3; v4 is opt-in.
         config = Twittertext::TwitterTextConfiguration.new
+        expect(config.get_version).to eq 3
         ranges = config.get_ranges
+        expect(ranges.length).to eq 4
 
         expect(ranges[0].range.start).to eq 0
         expect(ranges[0].range.end).to eq 4351
@@ -94,6 +98,25 @@ RSpec.describe Twittertext::TwitterTextConfiguration do
         expect(ranges[3].range.start).to eq 8242
         expect(ranges[3].range.end).to eq 8247
         expect(ranges[3].weight).to eq 100
+    end
+
+    it 'has a config v4' do
+        config = Twittertext::TwitterTextConfiguration.config_v4
+        expect(config.get_version).to eq 4
+        expect(config.get_emoji_parsing_enabled).to eq true
+        ranges = config.get_ranges
+        expect(ranges.length).to eq 5
+        # The Runic block, which v3 leaves at the default weight.
+        expect(ranges[1].range.start).to eq 5792
+        expect(ranges[1].range.end).to eq 5887
+        expect(ranges[1].weight).to eq 100
+    end
+
+    it 'has a config v3' do
+        config = Twittertext::TwitterTextConfiguration.config_v3
+        expect(config.get_version).to eq 3
+        expect(config.get_emoji_parsing_enabled).to eq true
+        expect(config.get_ranges.length).to eq 4
     end
 
     it 'has a config v2' do

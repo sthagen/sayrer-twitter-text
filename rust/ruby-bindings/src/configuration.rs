@@ -130,6 +130,12 @@ impl TwitterTextConfiguration {
         }
     }
 
+    pub fn config_v4() -> Self {
+        TwitterTextConfiguration {
+            inner: std::cell::RefCell::new(twitter_text_config::config_v4().clone()),
+        }
+    }
+
     pub fn get_version(&self) -> i32 {
         self.inner.borrow().version
     }

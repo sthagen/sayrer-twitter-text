@@ -11,6 +11,7 @@ rust_library(
         "src/v1.json",
         "src/v2.json",
         "src/v3.json",
+        "src/v4.json",
     ],
     deps = [
         "//3rdparty/crates:serde",

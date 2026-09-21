@@ -672,6 +672,39 @@
     XCTAssertEqual(2, weightedRange.weight);
 }
 
+- (void)testTwitterTextParserConfigurationV4WeightsRunicLikeLatin
+{
+    TwitterTextConfiguration *configurationV3 = [TwitterTextConfiguration configurationFromJSONResource:kTwitterTextParserConfigurationV3];
+    TwitterTextConfiguration *configurationV4 = [TwitterTextConfiguration configurationFromJSONResource:kTwitterTextParserConfigurationV4];
+
+    // V4 is V3 plus the Runic block. See
+    // https://github.com/twitter/twitter-text/issues/430
+    XCTAssertEqual(configurationV4.ranges.count, configurationV3.ranges.count + 1);
+
+    BOOL foundRunic = NO;
+    for (TwitterTextWeightedRange *weightedRange in configurationV4.ranges) {
+        if (weightedRange.range.location == 5792) {
+            XCTAssertEqual(weightedRange.range.length, 96);
+            XCTAssertEqual(weightedRange.weight, 100);
+            foundRunic = YES;
+        }
+    }
+    XCTAssertTrue(foundRunic, @"V4 should weight the Runic block like Latin");
+
+    for (TwitterTextWeightedRange *weightedRangeV3 in configurationV3.ranges) {
+        XCTAssertNotEqual(weightedRangeV3.range.location, (NSUInteger)5792,
+                          @"V3 should keep the upstream ranges");
+    }
+
+    // Elder Futhark: one unit per rune under V4, two under V3.
+    NSString *runes = @"\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2";
+    runes = [self stringByParsingUnicodeEscapes:runes];
+    TTTextParser *parserV4 = [[TTTextParser alloc] initWithConfiguration:configurationV4];
+    TTTextParser *parserV3 = [[TTTextParser alloc] initWithConfiguration:configurationV3];
+    XCTAssertEqual([parserV4 parseTweet:runes].weightedLength, 6);
+    XCTAssertEqual([parserV3 parseTweet:runes].weightedLength, 12);
+}
+
 - (void)testTwitterTextParserConfigurationV2ToV3Transition
 {
     TwitterTextConfiguration *configurationV2 = [TwitterTextConfiguration configurationFromJSONResource:kTwitterTextParserConfigurationV2];

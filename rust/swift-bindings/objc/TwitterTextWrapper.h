@@ -75,6 +75,7 @@ typedef NS_ENUM(NSUInteger, TTTextEntityType) {
 FOUNDATION_EXTERN NSString * const kTwitterTextParserConfigurationClassic;
 FOUNDATION_EXTERN NSString * const kTwitterTextParserConfigurationV2;
 FOUNDATION_EXTERN NSString * const kTwitterTextParserConfigurationV3;
+FOUNDATION_EXTERN NSString * const kTwitterTextParserConfigurationV4;
 
 @interface TTTextWeightedRange : NSObject
 

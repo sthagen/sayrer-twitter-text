@@ -449,6 +449,14 @@ describe("Configuration Tests", () => {
     assert.strictEqual(config.emojiParsingEnabled, true);
     config.free();
   });
+
+  test("configV4 returns valid configuration", () => {
+    const config = wasm.TwitterTextConfiguration.configV4();
+    assert.strictEqual(config.version, 4);
+    assert.strictEqual(config.maxWeightedTweetLength, 280);
+    assert.strictEqual(config.emojiParsingEnabled, true);
+    config.free();
+  });
 });
 
 // ============================================================================
@@ -475,6 +483,35 @@ describe("Tweet Parser Tests", () => {
     config.free();
     parser.free();
     result.free();
+  });
+
+  test("runic weighting with v4 config", () => {
+    // Runes weigh one unit each under v4, two under v3 and under the default.
+    // https://github.com/twitter/twitter-text/issues/430
+    const runes = "\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2";
+
+    const configV4 = wasm.TwitterTextConfiguration.configV4();
+    const parserV4 = new wasm.TwitterTextParser(configV4);
+    const resultV4 = parserV4.parseTweet(runes);
+    assert.strictEqual(resultV4.weightedLength, 6);
+    assert.strictEqual(resultV4.isValid, true);
+    configV4.free();
+    parserV4.free();
+    resultV4.free();
+
+    const configV3 = wasm.TwitterTextConfiguration.configV3();
+    const parserV3 = new wasm.TwitterTextParser(configV3);
+    const resultV3 = parserV3.parseTweet(runes);
+    assert.strictEqual(resultV3.weightedLength, 12);
+    configV3.free();
+    parserV3.free();
+    resultV3.free();
+
+    // v4 is opt-in: the default parseTweet entry point still weighs runes as
+    // logograms.
+    const resultDefault = wasm.parseTweet(runes);
+    assert.strictEqual(resultDefault.weightedLength, 12);
+    resultDefault.free();
   });
 
   test("emoji counting with v3 config", () => {

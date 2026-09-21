@@ -60,6 +60,22 @@ public final class Configuration implements AutoCloseable {
     }
 
     /**
+     * Create a new Configuration instance with v4 settings.
+     *
+     * @return a new Configuration instance with v4 config
+     */
+    public static Configuration createV4() {
+        try {
+            MemorySegment ptr = (MemorySegment) configuration_h
+                .twitter_text_config_v4$handle()
+                .invoke();
+            return new Configuration(ptr);
+        } catch (Throwable t) {
+            throw new RuntimeException("Failed to create v4 Configuration", t);
+        }
+    }
+
+    /**
      * Create a Configuration from a JSON string.
      *
      * @param json the JSON configuration string
