@@ -398,6 +398,10 @@ fn init(ruby: &Ruby) -> Result<(), Error> {
         "config_v3",
         function!(TwitterTextConfiguration::config_v3, 0),
     )?;
+    config_class.define_singleton_method(
+        "config_v4",
+        function!(TwitterTextConfiguration::config_v4, 0),
+    )?;
 
     config_class.define_method(
         "get_version",

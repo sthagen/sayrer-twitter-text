@@ -29,6 +29,13 @@ impl TwitterTextConfiguration {
         }
     }
 
+    #[wasm_bindgen(js_name = "configV4")]
+    pub fn config_v4() -> TwitterTextConfiguration {
+        TwitterTextConfiguration {
+            inner: twitter_text_config::config_v4().clone(),
+        }
+    }
+
     #[wasm_bindgen(js_name = "fromJson")]
     pub fn from_json(json: &str) -> Result<TwitterTextConfiguration, JsValue> {
         match serde_json::from_str::<Configuration>(json) {

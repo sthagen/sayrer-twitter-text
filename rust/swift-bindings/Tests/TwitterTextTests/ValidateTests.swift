@@ -68,6 +68,17 @@ final class ValidateTests: XCTestCase {
             XCTAssertEqual(result, test.expected, test.description)
         }
     }
+
+    func testRunicWeighting() {
+        // v4 weights the Runic block like Latin; v3 keeps the upstream weighting.
+        // See https://github.com/twitter/twitter-text/issues/430
+        let runes = "\u{16A0}\u{16A2}\u{16A6}\u{16A8}\u{16B1}\u{16B2}"
+
+        XCTAssertEqual(TwitterTextParser.parse(text: runes, config: .v4).weightedLength, 6)
+        XCTAssertEqual(TwitterTextParser.parse(text: runes, config: .v3).weightedLength, 12)
+        // v4 is opt-in: the default configuration still weighs runes as logograms.
+        XCTAssertEqual(TwitterTextParser.parse(text: runes).weightedLength, 12)
+    }
 }
 
 #else
@@ -93,6 +104,7 @@ class ValidateTests {
         testHashtags()
         testURLs()
         testURLsWithoutProtocol()
+        testRunicWeighting()
     }
 
     func testTweets() {
@@ -153,6 +165,17 @@ class ValidateTests {
             let result = validator.isValidURLWithoutProtocol(test.text)
             XCTAssertEqual(result, test.expected, test.description)
         }
+    }
+
+    func testRunicWeighting() {
+        // v4 weights the Runic block like Latin; v3 keeps the upstream weighting.
+        // See https://github.com/twitter/twitter-text/issues/430
+        let runes = "\u{16A0}\u{16A2}\u{16A6}\u{16A8}\u{16B1}\u{16B2}"
+
+        XCTAssertEqual(TwitterTextParser.parse(text: runes, config: .v4).weightedLength, 6)
+        XCTAssertEqual(TwitterTextParser.parse(text: runes, config: .v3).weightedLength, 12)
+        // v4 is opt-in: the default configuration still weighs runes as logograms.
+        XCTAssertEqual(TwitterTextParser.parse(text: runes).weightedLength, 12)
     }
 }
 

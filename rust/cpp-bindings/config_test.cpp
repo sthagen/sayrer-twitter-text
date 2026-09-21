@@ -50,6 +50,7 @@ TEST(TwitterTextConfigurationTest, Json) {
 
 TEST(TwitterTextConfigurationTest, Version) {
   TwitterTextConfiguration *config = new TwitterTextConfiguration();
+  // The default configuration is v3; v4 is opt-in.
   ASSERT_EQ(config->getVersion(), 3);
   config->setVersion(199);
   ASSERT_EQ(config->getVersion(), 199);
@@ -98,6 +99,8 @@ TEST(TwitterTextConfigurationTest, EmojiParsingEnabled) {
 
 TEST(TwitterTextConfigurationTest, Ranges) {
   TwitterTextConfiguration *config = new TwitterTextConfiguration();
+  // The default configuration is v3; v4 is opt-in.
+  ASSERT_EQ(config->getVersion(), 3);
   std::vector<WeightedRange> stdv = config->getRanges();
   ASSERT_EQ(stdv.size(), 4);
   WeightedRange wr = stdv[0];
@@ -116,6 +119,27 @@ TEST(TwitterTextConfigurationTest, Ranges) {
   ASSERT_EQ(wr.range.start, 8242);
   ASSERT_EQ(wr.range.end, 8247);
   ASSERT_EQ(wr.weight, 100);
+  delete config;
+}
+
+TEST(TwitterTextConfigurationTest, V4) {
+  TwitterTextConfiguration *config = new TwitterTextConfiguration(config_v4());
+  ASSERT_EQ(config->getVersion(), 4);
+  ASSERT_EQ(config->getEmojiParsingEnabled(), true);
+  std::vector<WeightedRange> stdv = config->getRanges();
+  ASSERT_EQ(stdv.size(), 5);
+  // The Runic block, which v3 leaves at the default weight.
+  ASSERT_EQ(stdv[1].range.start, 5792);
+  ASSERT_EQ(stdv[1].range.end, 5887);
+  ASSERT_EQ(stdv[1].weight, 100);
+  delete config;
+}
+
+TEST(TwitterTextConfigurationTest, V3) {
+  TwitterTextConfiguration *config = new TwitterTextConfiguration(config_v3());
+  ASSERT_EQ(config->getVersion(), 3);
+  ASSERT_EQ(config->getEmojiParsingEnabled(), true);
+  ASSERT_EQ(config->getRanges().size(), 4);
   delete config;
 }
 

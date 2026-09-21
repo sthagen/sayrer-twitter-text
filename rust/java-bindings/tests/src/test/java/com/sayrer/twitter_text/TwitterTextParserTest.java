@@ -28,6 +28,24 @@ public class TwitterTextParserTest extends TestCase {
             .weightedLength);
   }
 
+  public void testRunicWeighting() {
+    // Runes weigh one unit each under v4, two under v3 and under the default.
+    // https://github.com/twitter/twitter-text/issues/430
+    final String runes = "\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2";
+
+    ParseResults v4 = TwitterTextParser.parseTweet(runes, TwitterTextParser.TWITTER_TEXT_V4_CONFIG);
+    assertEquals("V4: runes weigh one unit each", 6, v4.weightedLength);
+    assertTrue("V4: Should be valid", v4.isValid);
+
+    ParseResults v3 =
+        TwitterTextParser.parseTweet(runes, TwitterTextParser.TWITTER_TEXT_EMOJI_CHAR_COUNT_CONFIG);
+    assertEquals("V3: runes take the default weight", 12, v3.weightedLength);
+
+    // v4 is opt-in: the default configuration still weighs runes as logograms.
+    assertEquals("Default: runes take the default weight", 12,
+        TwitterTextParser.parseTweet(runes).weightedLength);
+  }
+
   public void testWeightedLengthMixedUnicodeAndEmojiV2() {
     // Test case from conformance suite that requires v2 config
     // Text: "H🐱☺👨‍👩‍👧‍👦"

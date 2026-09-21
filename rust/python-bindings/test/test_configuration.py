@@ -8,6 +8,7 @@ import yaml
 def test_ctor():
     config = twitter_text.TwitterTextConfiguration()
     assert config is not None
+    # The default configuration is v3; v4 is opt-in.
     assert config.get_version() == 3
 
 
@@ -76,8 +77,11 @@ def test_accessors():
 
 
 def test_ranges():
+    # The default configuration is v3; v4 is opt-in.
     config = twitter_text.TwitterTextConfiguration()
+    assert config.get_version() == 3
     ranges = config.get_ranges()
+    assert len(ranges) == 4
     assert ranges[0].range.start == 0
     assert ranges[0].range.end == 4351
     assert ranges[0].weight == 100
@@ -93,6 +97,26 @@ def test_ranges():
     assert ranges[3].range.start == 8242
     assert ranges[3].range.end == 8247
     assert ranges[3].weight == 100
+
+
+def test_v4():
+    config = twitter_text.TwitterTextConfiguration.config_v4()
+    assert config.get_version() == 4
+    assert config.get_emoji_parsing_enabled() == True
+    ranges = config.get_ranges()
+    assert len(ranges) == 5
+    # The Runic block, which v3 leaves at the default weight.
+    assert ranges[1].range.start == 5792
+    assert ranges[1].range.end == 5887
+    assert ranges[1].weight == 100
+
+
+def test_v3():
+    config = twitter_text.TwitterTextConfiguration.config_v3()
+    assert config.get_version() == 3
+    assert config.get_emoji_parsing_enabled() == True
+    ranges = config.get_ranges()
+    assert len(ranges) == 4
 
 
 def test_v2():

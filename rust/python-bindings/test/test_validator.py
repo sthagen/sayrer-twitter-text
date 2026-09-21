@@ -21,6 +21,25 @@ def test_accessors():
     validator.set_short_url_length_https(43)
     assert validator.get_short_url_length_https() == 43
 
+def test_runic_weighting():
+    # Runes weigh one unit each under v4, two under v3 and under the default.
+    # https://github.com/twitter/twitter-text/issues/430
+    runes = "\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2"
+
+    v4 = twitter_text.TwitterTextParser.parse(
+        runes, twitter_text.TwitterTextConfiguration.config_v4(), True)
+    assert v4.weighted_length == 6
+    assert v4.is_valid
+
+    v3 = twitter_text.TwitterTextParser.parse(
+        runes, twitter_text.TwitterTextConfiguration.config_v3(), True)
+    assert v3.weighted_length == 12
+
+    default = twitter_text.TwitterTextParser.parse(
+        runes, twitter_text.TwitterTextConfiguration(), True)
+    assert default.weighted_length == 12
+
+
 def test_yaml():
     validator = twitter_text.Validator()
 

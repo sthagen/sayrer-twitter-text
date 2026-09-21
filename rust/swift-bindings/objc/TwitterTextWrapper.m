@@ -14,6 +14,7 @@
 NSString * const kTwitterTextParserConfigurationClassic = @"v1";
 NSString * const kTwitterTextParserConfigurationV2 = @"v2";
 NSString * const kTwitterTextParserConfigurationV3 = @"v3";
+NSString * const kTwitterTextParserConfigurationV4 = @"v4";
 
 #pragma mark - TTTextEntity
 
@@ -326,7 +327,9 @@ NSString * const kTwitterTextParserConfigurationV3 = @"v3";
 + (instancetype)configurationFromJSONResource:(NSString *)jsonResource {
     TTTextConfiguration *config = [[TTTextConfiguration alloc] init];
 
-    if ([jsonResource isEqualToString:kTwitterTextParserConfigurationV3]) {
+    if ([jsonResource isEqualToString:kTwitterTextParserConfigurationV4]) {
+        config.internalHandle = twitter_text_config_v4();
+    } else if ([jsonResource isEqualToString:kTwitterTextParserConfigurationV3]) {
         config.internalHandle = twitter_text_config_v3();
     } else if ([jsonResource isEqualToString:kTwitterTextParserConfigurationV2]) {
         config.internalHandle = twitter_text_config_v2();

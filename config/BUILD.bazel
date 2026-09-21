@@ -4,4 +4,5 @@ exports_files([
     "v1.json",
     "v2.json",
     "v3.json",
+    "v4.json",
 ])

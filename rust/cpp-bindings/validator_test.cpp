@@ -174,4 +174,26 @@ TEST(ValidatorTest, Weighted) {
   delete config_v3;
 }
 
+// Runes weigh one unit each under v4, two under v3 and under the default.
+// https://github.com/twitter/twitter-text/issues/430
+TEST(ValidatorTest, RunicWeighting) {
+  const std::string runes = u8"\u16A0\u16A2\u16A6\u16A8\u16B1\u16B2";
+
+  auto config_v4 = TwitterTextConfiguration::configV4();
+  auto result_v4 = TwitterTextParser::parse(runes, *config_v4, true);
+  ASSERT_EQ(result_v4.weighted_length, 6);
+  ASSERT_TRUE(result_v4.is_valid);
+  delete config_v4;
+
+  auto config_v3 = TwitterTextConfiguration::configV3();
+  auto result_v3 = TwitterTextParser::parse(runes, *config_v3, true);
+  ASSERT_EQ(result_v3.weighted_length, 12);
+  delete config_v3;
+
+  // v4 is opt-in: the default configuration still weighs runes as logograms.
+  TwitterTextConfiguration default_config;
+  auto result_default = TwitterTextParser::parse(runes, default_config, true);
+  ASSERT_EQ(result_default.weighted_length, 12);
+}
+
 } // twitter_text

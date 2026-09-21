@@ -89,6 +89,13 @@ impl TwitterTextConfiguration {
         }
     }
 
+    #[staticmethod]
+    fn config_v4() -> Self {
+        TwitterTextConfiguration {
+            inner: twitter_text_config::config_v4().clone(),
+        }
+    }
+
     fn get_version(&self) -> i32 {
         self.inner.version
     }

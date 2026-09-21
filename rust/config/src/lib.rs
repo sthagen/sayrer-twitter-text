@@ -20,6 +20,7 @@ pub const DEFAULT_TRANSFORMED_URL_LENGTH: i32 = 23;
 pub const V1_JSON: &str = include_str!("v1.json");
 pub const V2_JSON: &str = include_str!("v2.json");
 pub const V3_JSON: &str = include_str!("v3.json");
+pub const V4_JSON: &str = include_str!("v4.json");
 
 static CONFIG_V1: LazyLock<Configuration> = LazyLock::new(|| Configuration {
     version: 1,
@@ -61,6 +62,26 @@ static CONFIG_V3: LazyLock<Configuration> = LazyLock::new(|| Configuration {
     emoji_parsing_enabled: true,
 });
 
+/// v4 is v3 plus the Runic block, which is alphabetic and so weighs the same as
+/// Latin rather than taking the default weight. It is opt-in: the default
+/// configuration remains v3, which tracks upstream twitter-text.
+/// See https://github.com/twitter/twitter-text/issues/430
+static CONFIG_V4: LazyLock<Configuration> = LazyLock::new(|| Configuration {
+    version: 4,
+    max_weighted_tweet_length: 280,
+    scale: 100,
+    default_weight: 200,
+    transformed_url_length: 23,
+    ranges: vec![
+        WeightedRange::new(0, 4351, 100),
+        WeightedRange::new(5792, 5887, 100),
+        WeightedRange::new(8192, 8205, 100),
+        WeightedRange::new(8208, 8223, 100),
+        WeightedRange::new(8242, 8247, 100),
+    ],
+    emoji_parsing_enabled: true,
+});
+
 pub extern "C" fn config_v1() -> &'static Configuration {
     &CONFIG_V1
 }
@@ -71,6 +92,10 @@ pub extern "C" fn config_v2() -> &'static Configuration {
 
 pub extern "C" fn config_v3() -> &'static Configuration {
     &CONFIG_V3
+}
+
+pub extern "C" fn config_v4() -> &'static Configuration {
+    &CONFIG_V4
 }
 
 pub extern "C" fn default() -> &'static Configuration {
