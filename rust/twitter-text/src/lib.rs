@@ -188,4 +188,46 @@ mod tests {
         assert!(result.is_valid);
         assert_eq!(result.permillage, 14);
     }
+
+    /// The weighted length fast path may only answer for the code points the
+    /// leading range actually covers, however narrow that range is.
+    #[test]
+    fn test_weighting_respects_a_narrow_leading_range() {
+        // Weight 100 stops at U+007F, so U+0101 takes the default weight of 200.
+        let config = Configuration::configuration_from_json(
+            r#"{"version": 3, "maxWeightedTweetLength": 280, "scale": 100,
+                "defaultWeight": 200, "transformedURLLength": 23,
+                "ranges": [{"start": 0, "end": 127, "weight": 100}]}"#,
+        );
+
+        assert_eq!(parse("a", &config, false).weighted_length, 1);
+        assert_eq!(parse("ā", &config, false).weighted_length, 2);
+        assert_eq!(parse("aā", &config, false).weighted_length, 3);
+    }
+
+    /// A configuration whose ranges start above 0 has no fast path, so every
+    /// code point has to be looked up in the range list rather than assumed to
+    /// take the default weight.
+    #[test]
+    fn test_weighting_without_a_leading_range() {
+        // Only U+1100..U+1101 are discounted; everything else weighs 200.
+        let config = Configuration::configuration_from_json(
+            r#"{"version": 3, "maxWeightedTweetLength": 280, "scale": 100,
+                "defaultWeight": 200, "transformedURLLength": 23,
+                "ranges": [{"start": 4352, "end": 4353, "weight": 100}]}"#,
+        );
+
+        assert_eq!(parse("a", &config, false).weighted_length, 2);
+        assert_eq!(parse("ᄀ", &config, false).weighted_length, 1);
+        assert_eq!(parse("aᄀ", &config, false).weighted_length, 3);
+    }
+
+    /// v1 defines no ranges at all, so every code point takes the default weight.
+    #[test]
+    fn test_weighting_with_no_ranges() {
+        let config = twitter_text_config::config_v1();
+
+        assert_eq!(parse("hello", config, false).weighted_length, 5);
+        assert_eq!(parse("ᚠᚢᚦ漢字", config, false).weighted_length, 5);
+    }
 }

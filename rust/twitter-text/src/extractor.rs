@@ -1102,21 +1102,25 @@ struct TextMetrics<'a> {
     valid_offset: i32,
     normalized_length: i32,
     scaled_max_weighted_tweet_length: i32,
-    /// Cached weight for fast path (code points 0-4351), or None if no fast path available
-    fast_path_weight: Option<i32>,
+    /// The last code point covered by the leading weighted range and its weight,
+    /// when that range starts at 0. Most text falls inside it, so this answers
+    /// `track_text` without walking the range list. `None` when the
+    /// configuration's ranges don't begin at 0 and every code point must be
+    /// looked up.
+    fast_path: Option<(i32, i32)>,
     config: &'a Configuration,
 }
 
 impl<'a> TextMetrics<'a> {
     fn new(config: &Configuration, normalized_length: i32) -> TextMetrics<'_> {
-        // Pre-compute fast path weight if first range starts at 0
-        let fast_path_weight = config.ranges.first().and_then(|r| {
-            if r.range.start() == 0 {
-                Some(r.weight)
-            } else {
-                None
-            }
-        });
+        // Pre-compute the fast path from the leading range, if it covers 0. A
+        // configuration with no ranges at all (v1) weighs every code point the
+        // same, which is the same fast path over the whole code point space.
+        let fast_path = match config.ranges.first() {
+            Some(r) if r.range.start() == 0 => Some((r.range.end(), r.weight)),
+            None => Some((i32::MAX, config.default_weight)),
+            Some(_) => None,
+        };
         TextMetrics {
             is_valid: true,
             weighted_count: 0,
@@ -1124,7 +1128,7 @@ impl<'a> TextMetrics<'a> {
             valid_offset: 0,
             normalized_length,
             scaled_max_weighted_tweet_length: config.max_weighted_tweet_length * config.scale,
-            fast_path_weight,
+            fast_path,
             config,
         }
     }
@@ -1153,16 +1157,11 @@ impl<'a> TextMetrics<'a> {
     fn track_text(&mut self, c: char) {
         if self.offset < self.normalized_length {
             let code_point: i32 = c as i32;
-            // Fast path: use cached weight for code points 0-4351 (ASCII, Latin-1, common scripts)
-            let char_weight = if let Some(weight) = self.fast_path_weight {
-                if code_point <= 4351 {
-                    weight
-                } else {
-                    self.weight_for_code_point(code_point)
-                }
-            } else {
-                // No fast path (v1 config or unusual ranges) - use default weight
-                self.config.default_weight
+            // Fast path: the leading range covers ASCII, Latin-1 and the other
+            // common scripts, so most code points are answered without a scan.
+            let char_weight = match self.fast_path {
+                Some((end, weight)) if code_point <= end => weight,
+                _ => self.weight_for_code_point(code_point),
             };
             self.weighted_count += char_weight;
             self.add_char(c);
